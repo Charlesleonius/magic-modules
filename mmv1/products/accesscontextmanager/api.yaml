@@ -67,6 +67,13 @@ objects:
         required: true
         description: |
           Human readable title. Does not affect behavior.
+      - !ruby/object:Api::Type::Array
+        name: scopes
+        description: |
+          Folder or project on which this policy is applicable. 
+          Format: folders/{{folder_id}} or projects/{{project_id}}
+        item_type: Api::Type::String
+        max_size: 1
     properties:
       - !ruby/object:Api::Type::String
         name: name
@@ -2076,3 +2083,76 @@ objects:
         max_size: 1
         description: |
           Required. Access level that a user must have to be granted access. Only one access level is supported, not multiple. This repeated field must have exactly one element. Example: "accessPolicies/9522/accessLevels/device_trusted"
+  - !ruby/object:Api::Resource
+    name: 'AccessPolicyBinding'
+    base_url: "{{access_policy_id}}:setIamPolicy"
+    self_link: "{{access_policy_id}}:getIamPolicy"
+    create_verb: :POST
+    read_verb: :POST
+    description: |
+      Add IAM policy binding for an access policy    
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides: 
+        'Granting iam policy': 'https://cloud.google.com/iam/docs/granting-changing-revoking-access#iam-grant-single-role-gcloud'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: accessPolicyId
+        input: true
+        required: true
+        url_param_only: true
+        description: |
+          required. Name of the access policy.
+          format: accessPolicies/<policy id>
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'policy'
+        description: |
+          Describes the policy you want to apply
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: bindings
+            required: true
+            description: |
+              A list of bindings to apply
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::Array
+                  name: 'members'
+                  required: true
+                  input: true
+                  description: |
+                    A list of principals for which to bind this policy. Should be of the form user|group|serviceAccount:email or domain:domain
+                  item_type: Api::Type::String
+                - !ruby/object:Api::Type::String
+                  name: 'role'
+                  required: true
+                  input: true
+                  description: |
+                    Role name to assign to the principal. The role name is the complete path of a predefined role, such as roles/logging.viewer
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'condition'
+                  description: |
+                    A condition to include in the binding. Conditions are set using the Cloud Common Expression Language 
+                    See CEL spec at: https://github.com/google/cel-spec.
+                  properties:
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'expr'
+                      required: true
+                      description: |
+                        Represents a textual expression in the Common Expression Language (CEL) syntax. CEL is a C-like expression language.
+                        This page details the objects and attributes that are used to the build the CEL expressions for 
+                        custom access levels - https://cloud.google.com/access-context-manager/docs/custom-access-level-spec.
+                      properties:
+                      - !ruby/object:Api::Type::String
+                        name: 'expression'
+                        required: true
+                        description: Textual representation of an expression in Common Expression Language syntax.
+                      - !ruby/object:Api::Type::String
+                        name: 'title'
+                        description: Title for the expression, i.e. a short string describing its purpose.
+                      - !ruby/object:Api::Type::String
+                        name: 'description'
+                        description: Description of the expression 
+                      - !ruby/object:Api::Type::String
+                        name: 'location'
+                        description: String indicating the location of the expression for error reporting, e.g. a file name and a position in the file      
