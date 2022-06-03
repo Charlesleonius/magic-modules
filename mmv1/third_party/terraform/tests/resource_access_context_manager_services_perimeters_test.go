@@ -116,7 +116,7 @@ resource "google_access_context_manager_service_perimeters" "test-access" {
     title          = "%s"
     perimeter_type = "PERIMETER_TYPE_REGULAR"
     status {
-      restricted_services: "bigquery.googleapis.com"
+      restricted_services = "bigquery.googleapis.com"
       egress_policies {
         egress_to {
           external_resources = ["s3://bucket1"]
@@ -185,7 +185,7 @@ resource "google_access_context_manager_service_perimeters" "test-access" {
     title          = "%s"
     perimeter_type = "PERIMETER_TYPE_REGULAR"
     status {
-      restricted_services: "bigquery.googleapis.com"
+      restricted_services = "bigquery.googleapis.com"
       egress_policies {
         egress_to {
           external_resources = ["s3://bucket2"]
