@@ -257,10 +257,10 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
 				identities = ["user:test@google.com"]
 			}
 			ingress_to {
+                                roles = ["roles/bigquery.admin"]
 				resources = ["*"]
 			}
 		}
-
 		egress_policies {
 			egress_from {
 				identity_type = "ANY_USER_ACCOUNT"
@@ -283,7 +283,8 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
 			egress_from {
 				identities = ["user:test@google.com"]
 			}
-			egress_to {
+                        egress_to {
+                                roles = ["roles/bigquery.admin"]
 				resources = ["*"]
 			}
 		}
@@ -337,6 +338,7 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
 				identities = ["user:test@google.com"]
 			}
 			ingress_to {
+                                roles = ["roles/bigquery.admin"]
 				resources = ["*"]
 			}
 		}
@@ -364,6 +366,7 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
 				identities = ["user:test@google.com"]
 			}
 			egress_to {
+                                roles = ["roles/bigquery.admin"]
 				resources = ["*"]
 			}
 		}

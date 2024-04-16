@@ -10,50 +10,30 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
   perimeter_type = "PERIMETER_TYPE_REGULAR"
   status {
       restricted_services = ["bigquery.googleapis.com", "storage.googleapis.com"]
-
       vpc_accessible_services {
           enable_restriction = true
           allowed_services   = ["bigquery.googleapis.com", "storage.googleapis.com"]
       }
-
       ingress_policies {
           ingress_from {
               sources {
                   access_level = google_access_context_manager_access_level.test-access.name
               }
-              identities = ["group:database-admins@google.com"]
-              identities = ["principal://iam.googleapis.com/locations/global/workforcePools/1234/subject/janedoe"]
-              identities = ["principalSet://iam.googleapis.com/locations/global/workforcePools/1234/*"]
+              identities = ["user:admin@google.com"]
           }
-
           ingress_to {
-              resources = [ "*" ]
-              operations {
-                  service_name = "storage.googleapis.com"
-
-                  method_selectors {
-                      method = "google.storage.objects.create"
-                  }
-              }
+            resources = [ "*" ]
+            roles = ["roles/bigquery.admin", "organizations/123456789/roles/custom_admin_role"]
           }
       }
-
       egress_policies {
           egress_from {
-              identities = ["group:database-admins@google.com"]
-              identities = ["principal://iam.googleapis.com/locations/global/workforcePools/1234/subject/janedoe"]
-              identities = ["principalSet://iam.googleapis.com/locations/global/workforcePools/1234/*"]
+              identities = ["user:admin@google.com"]
           }
           egress_to {
               resources = [ "*" ]
-              operations {
-                  service_name = "storage.googleapis.com"
-
-                  method_selectors {
-                      method = "google.storage.objects.create"
-                  }
-              }
-          }
+              roles = ["roles/bigquery.admin", "organizations/123456789/roles/custom_admin_role"]
+         }
       }
    }
 }
