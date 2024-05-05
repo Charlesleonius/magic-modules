@@ -275,6 +275,10 @@ type Type struct {
 	ResourceMetadata *Resource
 
 	ParentMetadata *Type // is nil for top-level properties
+
+	// The prefix used as part of the property expand/flatten function name
+	// flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}
+	Prefix string
 }
 
 const MAX_NAME = 20
@@ -415,6 +419,38 @@ func (t Type) EnumValuesToString() string {
 	}
 
 	return strings.Join(values, ", ")
+}
+
+// def titlelize_property(property)
+func (t Type) TitlelizeProperty() string {
+	return google.Camelize(t.Name, "upper")
+}
+
+// If the Prefix field is already set, returns the value.
+// Otherwise, set the Prefix field and returns the value.
+func (t *Type) GetPrefix() string {
+	if t.Prefix == "" {
+		if t.ParentMetadata == nil {
+			nestedPrefix := ""
+			if t.ResourceMetadata.NestedQuery != nil {
+				nestedPrefix = "Nested"
+			}
+
+			t.Prefix = fmt.Sprintf("%s%s", nestedPrefix, t.ResourceMetadata.ResourceName())
+		} else {
+			t.Prefix = fmt.Sprintf("%s%s", t.ParentMetadata.GetPrefix(), t.ParentMetadata.TitlelizeProperty())
+		}
+	}
+	return t.Prefix
+}
+
+func (t Type) ResourceType() string {
+	r := t.ResourceRef()
+	if r == nil {
+		return ""
+	}
+	path := strings.Split(r.BaseUrl, "/")
+	return path[len(path)-1]
 }
 
 // func (t *Type) to_json(opts) {
@@ -1181,3 +1217,29 @@ func (t Type) PropertyNsPrefix() []string {
 		"Property",
 	}
 }
+
+// "Namespace" - prefix with product and resource - a property with
+// information from the "object" variable
+
+func (t Type) NamespaceProperty() string {
+	name := google.Camelize(t.Name, "lower")
+	p := t
+	for p.Parent() != nil {
+		p = *p.Parent()
+		name = fmt.Sprintf("%s%s", google.Camelize(p.Name, "lower"), name)
+	}
+
+	return fmt.Sprintf("%s%s%s", google.Camelize(t.ApiName, "lower"), t.ResourceMetadata.Name, name)
+}
+
+// def namespace_property_from_object(property, object)
+//
+//	name = property.name.camelize
+//	until property.parent.nil?
+//	  property = property.parent
+//	  name = property.name.camelize + name
+//	end
+//
+//	"#{property.__resource.__product.api_name.camelize(:lower)}#{object.name}#{name}"
+//
+// end
